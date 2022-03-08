@@ -3,7 +3,7 @@ Scripts to support embedded use of Linux.
 
 # Structure
 
-## common directory
+## Top-level directory
 Distro-independent scripts.
 
 ## suse directory
