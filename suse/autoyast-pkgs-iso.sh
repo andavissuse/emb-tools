@@ -2,12 +2,12 @@
 
 #
 # This script compares an autoyast profile against an iso/directory/mnt-point
-# then outputs a list of packages that are not provided by the iso.
+# then outputs a list of the autoyast profile packages that are not found.
 #
 # Inputs: 1) full path to autoyast profile
 #         2) full path to iso or directory/mount-point
 #
-# Output: Package additions written to ./pkgs-missing.txt.
+# Output: List of missing packages written to stdout.
 #
 
 # functions
@@ -61,9 +61,10 @@ fi
 [ $DEBUG ] && echo "*** DEBUG: $0: ayProfile: $ayProfile" >&2
 [ $DEBUG ] && echo "*** DEBUG: $0: pathToChk: $pathToChk" >&2
 
+echo ">>> Finding packages in $ayProfile..."
 grep "<package>.*</package>" $ayProfile | sed "s/<package>//g" | sed "s/<\/package>//g" | sed "s/^ *//g" > $tmpDir/ayPkgList.tmp
 
-echo ">>> Checking packages (this may take several minutes)..."
+echo ">>> $ayProfile packages not found in $2:"
 while IFS= read -r ayPkg; do
 	[ $DEBUG ] && echo "*** DEBUG: $0: ayPkg: $ayPkg" >&2
 	isoPkgs=`find $pathToChk -name $ayPkg*.rpm`
@@ -84,7 +85,7 @@ while IFS= read -r ayPkg; do
 	fi
 	if [ "$found" = "n" ]; then
 		[ $DEBUG ] && echo "*** DEBUG: $0: Did not find $ayPkg" >&2
-		echo $ayPkg >> ./pkgs-missing.txt
+		echo $ayPkg
 	fi
 done < $tmpDir/ayPkgList.tmp
 

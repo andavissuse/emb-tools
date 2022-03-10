@@ -7,8 +7,7 @@
 # Inputs: 1) full path to iso1 or directory/mount-point-1
 #         2) full path to iso2 or directory/mount-point-2
 #
-# Output: Package additions written to ./pkg-adds.txt.
-#	  Package deletions writtin to ./pkg-dels.txt.
+# Output: Package additions and deletions written to stdout.
 #
 
 # functions
@@ -71,7 +70,7 @@ fi
 [ $DEBUG ] && echo "*** DEBUG: $0: path1: $path1" >&2
 [ $DEBUG ] && echo "*** DEBUG: $0: path2: $path2" >&2
 
-echo ">>> Finding packages (this may take several minutes)..."
+echo ">>> Building package lists and comparing (this may take several minutes)..."
 for pkg in `find $path1 -name *.rpm`; do
 	rpmname=`rpm -qp --queryformat %{NAME} $pkg 2>/dev/null`
 	echo "$rpmname" >> $tmpDir/path1rpms.txt
@@ -81,15 +80,14 @@ for pkg in `find $path2 -name *.rpm`; do
 	echo "$rpmname" >> $tmpDir/path2rpms.txt
 done
 
-echo ">>> Comparing packages..."
 cat $tmpDir/path1rpms.txt | sort -u > $tmpDir/path1rpms-sorted.txt
 cat $tmpDir/path2rpms.txt | sort -u > $tmpDir/path2rpms-sorted.txt
 
-echo ">>> Writing added packages to ./pkg-adds.txt..."
-comm -13 $tmpDir/path1rpms-sorted.txt $tmpDir/path2rpms-sorted.txt > ./pkg-adds.txt
+echo ">>> Packages added in $2:"
+comm -13 $tmpDir/path1rpms-sorted.txt $tmpDir/path2rpms-sorted.txt
 
-echo ">>> Writing deleted packages to ./pkg-dels.txt..."
-comm -23 $tmpDir/path1rpms-sorted.txt $tmpDir/path2rpms-sorted.txt > ./pkg-dels.txt
+echo ">>> Packages deleted in $2:"
+comm -23 $tmpDir/path1rpms-sorted.txt $tmpDir/path2rpms-sorted.txt
 
 echo ">>> Cleaning up..."
 umount $tmpDir/mnt? >/dev/null 2>&1
