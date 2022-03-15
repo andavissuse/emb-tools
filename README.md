@@ -9,7 +9,7 @@ pkg-adds-dels-iso.sh: Compare 2 isos (or paths), list the packages added and del
 
     - Arguments: iso1-or-path1, iso2-or-path2
     - Options: -h(elp), -d(ebug)
-    - Output: Packages added and deleted in iso2-or-path2
+    - Output: List of packages added and list of packages deleted 
 
 ## suse directory - Scripts for Use with SUSE Distros
 
