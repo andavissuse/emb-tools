@@ -22,5 +22,5 @@ autoyast-pkgs-iso.sh: Compare an autoyast profile to an iso (or path), list the 
 autoyast-pkgs-repos.sh: Compare an autoyast profile to repo(s), list the packages not found in the repo(s).
 
     - Arguments: autoyast-profile
-    - Options: -h(elp), -d(ebug), -r(epo) (default is to use all registered repos)
-    - Output: autoyast profile packages that not provided by registered repos (both enabled and disabled)
+    - Options: -h(elp), -d(ebug), -r repo (default is to use all registered repos, both enabled and disabled)
+    - Output: autoyast profile packages that are not provided by repo(s)

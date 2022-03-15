@@ -6,19 +6,20 @@
 # Repos must be registered on the system, but they do not have to be enabled.
 #
 # Inputs: 1) full path to autoyast profile
-#         2) (optional with -r option) name(s) of registered repo(s).  By
-#	     default, script will check all registered repos.
+#         2) (optional with -r option) name(s) of repo(s).  By
+#	     default, script will check all registered repos (enabled and
+#	     disabled).
 #
 # Output: List of missing packages written to stdout.
 #
 
 # functions
 function usage() {
-	echo "Usage: `basename $0` [-h (usage)] [-d(ebug)] [-r(epo)] <autoyast-profile>"
+	echo "Usage: `basename $0` [-h (usage)] [-d(ebug)] [-r repo] <autoyast-profile>"
 }
 
 # arguments
-while getopts 'hd' OPTION; do
+while getopts 'hdr:' OPTION; do
         case $OPTION in
                 h)
                         usage
@@ -47,18 +48,22 @@ fi
 [ $DEBUG ] && echo "*** DEBUG: $0: repos: $repos" >&2
 
 tmpDir=`mktemp -d`
-echo ">>> Finding packages in $ayProfile..."
 [ $DEBUG ] && echo "*** DEBUG: $0: tmpDir: $tmpDir" >&2
+
+echo ">>> Finding packages in $ayProfile..."
 grep "<package>.*</package>" $ayProfile | sed "s/<package>//g" | sed "s/<\/package>//g" | sed "s/^ *//g" > $tmpDir/ayPkgList.tmp
 plusContentOpts=""
+repoOpts=""
 for repo in $repos; do
 	plusContentOpts="$plusContentOpts --plus-content $repo"
+	repoOpts="$repoOpts -r $repo"
 done
 [ $DEBUG ] && echo "*** DEBUG: $0: plusContentOpts: $plusContentOpts" >&2
-echo ">>> Finding packages in registered repos (both enabled and disabled)..."
-zypper ${plusContentOpts} pa | grep -E "^.{3}\|" | cut -d '|' -f3 | sed "s/^ *//g" | sed "s/ *$//g" > $tmpDir/pkgsRepos.tmp
+[ $DEBUG ] && echo "*** DEBUG: $0: repoOpts: $repoOpts" >&2
+echo ">>> Checking against packages in repo(s)..."
+zypper ${plusContentOpts} pa ${repoOpts}  | sed "1,4d" | cut -d '|' -f3 | sed "s/^ *//g" | sed "s/ *$//g" > $tmpDir/pkgsRepos.tmp
 
-echo ">>> $ayProfile packages not found in registered repos:"
+echo ">>> $ayProfile packages not found in repo(s):"
 while IFS= read -r ayPkg; do
         [ $DEBUG ] && echo "*** DEBUG: $0: ayPkg: $ayPkg" >&2
 	if grep -q "^$ayPkg$" $tmpDir/pkgsRepos.tmp; then
